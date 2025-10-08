@@ -10,7 +10,18 @@ import job from './config/cron.js';
 const app = express();
 const PORT = ENV.PORT || 5001;
 
-if (ENV.NODE_ENV === 'production') job.start();
+// Start cron job only in production and only if it's available
+if (ENV.NODE_ENV === 'production') {
+  try {
+    if (job && typeof job.start === 'function') {
+      job.start();
+    } else {
+      console.warn('Cron job not started: invalid export from ./config/cron.js');
+    }
+  } catch (e) {
+    console.error('Error starting cron job:', e);
+  }
+}
 
 // Parse JSON but keep the raw body for debugging malformed JSON
 app.use(express.json({
@@ -98,4 +109,4 @@ app.use((err, req, res, next) => {
     return res.status(400).json({ success: false, message: 'Malformed JSON in request body' });
   }
   next(err);
-});  
+});
