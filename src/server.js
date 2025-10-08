@@ -2,11 +2,15 @@ import express from 'express';
 import { ENV } from "./config/env.js";
 import { db } from "./config/db.js";
 import { favoritesTable } from './db/schema.js';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
+import job from './config/cron.js';
+
 // Removed duplicate imports
 
 const app = express();
 const PORT = ENV.PORT || 5001;
+
+if (ENV.NODE_ENV === 'production') job.start();
 
 // Parse JSON but keep the raw body for debugging malformed JSON
 app.use(express.json({
